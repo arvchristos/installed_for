@@ -28,9 +28,13 @@ function displaytime {
 	  		D=$((D-365))
 	  	fi
 	  done
-	(( $Y > 0 )) && printf '%d years ' $Y
+      if [[ $Y -gt 1 ]]; then
+          printf '%d years ' $Y
+      elif [[ $Y -eq 1 ]]; then
+          printf '%d year ' $Y
+      fi
   fi
-  
+
   (( $D >= 0 )) && printf '%d days ' $D
   (( $H > 0 )) && printf '%d hours ' $H
   (( $M > 0 )) && printf '%d minutes ' $M
@@ -42,27 +46,34 @@ function displaytime {
 distro_flavor=$(grep "ID_LIKE=" < /etc/os-release | cut -d '=' -f2 | sed -e 's/^"//' -e 's/"$//' | cut -d ' ' -f1)
 
 case "${distro_flavor}" in
-	arch ) 
+	arch )
 		INSTALL_DATE=$(awk 'NR==1{gsub(/\[|\]/,"");print $1,$2}' /var/log/pacman.log)
+        INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
+
 		;;
 	rhel|fedora )
 		INSTALL_DATE=$(rpm -q basesystem --qf '%{installtime:date}\n' )
+        INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 		;;
 	debian )
-		INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')	
-		;;
+		INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')
+		INSTALL_DATE=$(stat -c "%w" /var/log/installer)
+        INSTALL_EPOCH=$(stat -c "%W" /var/log/installer)
+        ;;
 	* )
-		INSTALL_DATE=$(ls -lact --full-time /etc |awk 'END {print $6,$7,$8}')	
+		#INSTALL_DATE=$(ls -lact --full-time /etc |awk 'END {print $6,$7,$8}')
+        INSTALL_DATE=$(stat -c "%w" /etc)
+        INSTALL_EPOCH=$(stat -c "%W" /etc)
 		;;
 esac
 
-INSTALL_YEAR=$(date --date "$INSTALL_DATE" +%Y)
+INSTALL_YEAR=$(awk 'END {print $4}' <<< "$INSTALL_DATE")
 
-INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s)
+# BASH >=4.2
+printf -v INSTALL_YEAR '%(%Y)T\n' $INSTALL_EPOCH
 
-CURRENT_EPOCH=$(date +%s)
-
-CURRENT_YEAR=$(date +%Y)
+printf -v CURRENT_EPOCH '%(%s)T\n' -1
+printf -v CURRENT_YEAR '%(%Y)T\n' -1
 
 ELAPSED_EPOCH=$((CURRENT_EPOCH-INSTALL_EPOCH))
 
