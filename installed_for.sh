@@ -65,7 +65,7 @@ case "${distro_flavor}" in
 		#INSTALL_DATE=$(ls -lact --full-time /etc |awk 'END {print $6,$7,$8}')
 		distro_id=$(grep "^ID=" < /etc/os-release | cut -d '=' -f2 | sed -e 's/^"//' -e 's/"$//' | cut -d ' ' -f1)
 		case "$distro_id" in
-			sabayon )
+			gentoo|sabayon )
 				INSTALL_DATE=$(ls -lact --full-time /etc/machine-id |awk 'END {print $6,$7,$8}')
 				INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 				;;
