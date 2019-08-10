@@ -56,9 +56,10 @@ case "${distro_flavor}" in
         INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 		;;
 	debian|ubuntu)
-		#INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')
-		INSTALL_DATE=$(stat -c "%w" /var/log/installer)
-		INSTALL_EPOCH=$(stat -c "%W" /var/log/installer)
+		INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')
+		#INSTALL_DATE=$(stat -c "%w" /var/log/installer) stat not working on mint
+		#INSTALL_EPOCH=$(stat -c "%W" /var/log/installer)
+		INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
         ;;
 	* )
 		#INSTALL_DATE=$(ls -lact --full-time /etc |awk 'END {print $6,$7,$8}')
