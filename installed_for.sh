@@ -48,22 +48,24 @@ distro_flavor=$(grep "ID_LIKE=" < /etc/os-release | cut -d '=' -f2 | sed -e 's/^
 case "${distro_flavor}" in
 	arch )
 		INSTALL_DATE=$(awk 'NR==1{gsub(/\[|\]/,"");print $1,$2}' /var/log/pacman.log)
-        INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
+		INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 
 		;;
 	rhel|fedora )
 		INSTALL_DATE=$(rpm -q basesystem --qf '%{installtime:date}\n' )
         INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 		;;
-	debian )
-		INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')
+	debian|ubuntu)
+		#INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')
 		INSTALL_DATE=$(stat -c "%w" /var/log/installer)
-        INSTALL_EPOCH=$(stat -c "%W" /var/log/installer)
+		INSTALL_EPOCH=$(stat -c "%W" /var/log/installer)
         ;;
 	* )
 		#INSTALL_DATE=$(ls -lact --full-time /etc |awk 'END {print $6,$7,$8}')
+		distro_id=$(grep "^ID=" < /etc/os-release | cut -d '=' -f2 | sed -e 's/^"//' -e 's/"$//' | cut -d ' ' -f1)
+
         INSTALL_DATE=$(stat -c "%w" /etc)
-        INSTALL_EPOCH=$(stat -c "%W" /etc)
+		INSTALL_EPOCH=$(stat -c "%W" /etc)
 		;;
 esac
 
