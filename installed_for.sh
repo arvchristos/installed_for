@@ -56,7 +56,7 @@ case "${distro_flavor}" in
         INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 		;;
 	debian|ubuntu)
-		INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk 'END {print $6,$7,$8}')
+		INSTALL_DATE=$(ls -lact --full-time /var/log/installer |awk '{print $6,$7,$8}')
 		#INSTALL_DATE=$(stat -c "%w" /var/log/installer) stat not working on mint
 		#INSTALL_EPOCH=$(stat -c "%W" /var/log/installer)
 		INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
@@ -65,8 +65,9 @@ case "${distro_flavor}" in
 		#INSTALL_DATE=$(ls -lact --full-time /etc |awk 'END {print $6,$7,$8}')
 		distro_id=$(grep "^ID=" < /etc/os-release | cut -d '=' -f2 | sed -e 's/^"//' -e 's/"$//' | cut -d ' ' -f1)
 		case "$distro_id" in
-			gentoo|sabayon )
-				INSTALL_DATE=$(ls -lact --full-time /etc/machine-id |awk 'END {print $6,$7,$8}')
+			gentoo|sabayon|deepin )
+				#https://www.freedesktop.org/software/systemd/man/machine-id.html
+				INSTALL_DATE=$(ls -lact --full-time /etc/machine-id |awk '{print $6,$7,$8}')
 				INSTALL_EPOCH=$(date --date  "${INSTALL_DATE}" +%s) #should find alternative to date
 				;;
 			* )
